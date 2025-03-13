@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 
 
-class CNNLocalizer:
+class CNNDetector:
     def __init__(
         self,
         loss_fn,
@@ -32,7 +32,7 @@ class CNNLocalizer:
 
                 # Forward pass
                 outputs = self.model(X_batch)
-                loss = torch.mean(self.loss_fn(outputs, y_batch))
+                loss = self.loss_fn(outputs, y_batch)
 
                 # Backward pass
                 optimizer.zero_grad()
