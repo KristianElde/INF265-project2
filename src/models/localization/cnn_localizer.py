@@ -41,19 +41,17 @@ class CNNLocalizer:
 
         return self
 
-    def predict(self, dataloader):
+    def predict(self, X):
         if not self.model:
             raise ValueError("fit must be called before calling predict")
 
         self.model.eval()
         preds = torch.empty(0, device=self.device)
-        for X, _ in dataloader:
-            X = X.to(self.device)
-            with torch.no_grad():
-                outputs = self.model(X)
-            predicted = torch.argmax(outputs[:, :5], dim=1)
-            preds = torch.cat(
-                (preds, torch.cat((outputs[:, :5], predicted.unsqueeze(1)), dim=1))
-            )
-        print(preds)
+        X = X.to(self.device)
+        with torch.no_grad():
+            outputs = self.model(X)
+        predicted = torch.argmax(outputs[:, :5], dim=1)
+        preds = torch.cat(
+            (preds, torch.cat((outputs[:, :5], predicted.unsqueeze(1)), dim=1))
+        )
         return preds
