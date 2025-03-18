@@ -52,10 +52,6 @@ class CNNLocalizer:
         with torch.no_grad():
             outputs = self.model(X)
 
-        # Compute class predictions
         predicted_classes = torch.argmax(outputs[:, 5:], dim=1, keepdim=True)
-
-        # Concatenate detection score, bounding box, and predicted class
         preds = torch.cat((outputs[:, :5], predicted_classes.float()), dim=1)
-
         return preds
