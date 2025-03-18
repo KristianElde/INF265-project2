@@ -18,9 +18,9 @@ class CNNLocalizer:
             if torch.cuda.is_available()
             else "mps" if torch.backends.mps.is_available() else "cpu"
         )
+        print(f"running on: {str(self.device)}")
 
     def fit(self, dataloader: DataLoader):
-
         self.model = CNN().to(self.device)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.model.train()
@@ -30,9 +30,9 @@ class CNNLocalizer:
             for X_batch, y_batch in dataloader:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
 
-                # Forward pass
-                outputs = self.model(X_batch)
-                loss = torch.mean(self.loss_fn(outputs, y_batch))
+                with torch.amp.autocast(self.device.type):
+                    outputs = self.model(X_batch)
+                    loss = torch.mean(self.loss_fn(outputs, y_batch))
 
                 # Backward pass
                 optimizer.zero_grad()
