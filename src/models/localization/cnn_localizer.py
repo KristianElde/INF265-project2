@@ -26,18 +26,19 @@ class CNNLocalizer:
         self.model.train()
 
         for i in range(self.num_epochs):
-            print(f"Epoch {i}/{self.num_epochs}")
+            epoch_loss = 0
             for X_batch, y_batch in dataloader:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
 
-                with torch.amp.autocast(self.device.type):
-                    outputs = self.model(X_batch)
-                    loss = torch.mean(self.loss_fn(outputs, y_batch))
+                outputs = self.model(X_batch)
+                loss = torch.mean(self.loss_fn(outputs, y_batch))
+                epoch_loss += loss.item()
 
                 # Backward pass
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+            print(f"Epoch {i+1}/{self.num_epochs} — Loss: {epoch_loss}")
 
         return self
 
@@ -46,12 +47,15 @@ class CNNLocalizer:
             raise ValueError("fit must be called before calling predict")
 
         self.model.eval()
-        preds = torch.empty(0, device=self.device)
         X = X.to(self.device)
+
         with torch.no_grad():
             outputs = self.model(X)
-        predicted = torch.argmax(outputs[:, :5], dim=1)
-        preds = torch.cat(
-            (preds, torch.cat((outputs[:, :5], predicted.unsqueeze(1)), dim=1))
-        )
+
+        # Compute class predictions
+        predicted_classes = torch.argmax(outputs[:, 5:], dim=1, keepdim=True)
+
+        # Concatenate detection score, bounding box, and predicted class
+        preds = torch.cat((outputs[:, :5], predicted_classes.float()), dim=1)
+
         return preds
