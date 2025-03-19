@@ -1,0 +1,46 @@
+import torch
+import torch.nn as nn
+
+
+class CNNWithBatchNorm(nn.Module):
+    def __init__(
+        self,
+        num_classes=15,
+    ):
+        torch.manual_seed(42)
+        super(CNNWithBatchNorm, self).__init__()
+        self.convolutional_layers = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1),
+            nn.BatchNorm2d(16),  # BatchNorm after Conv2d
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(in_channels=32, out_channels=48, kernel_size=3, padding=1),
+            nn.BatchNorm2d(48),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=3),
+            nn.Conv2d(in_channels=48, out_channels=64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+        )
+
+        self.fully_connected_layers = nn.Sequential(
+            nn.Linear(64 * 4 * 5, 128),
+            nn.BatchNorm1d(128),  # BatchNorm for FC layer
+            nn.ReLU(),
+            nn.Dropout(0.25),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.convolutional_layers(x)
+        x = torch.flatten(x, 1)
+        x = self.fully_connected_layers(x)
+        return x
