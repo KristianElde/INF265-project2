@@ -1,4 +1,3 @@
-from src.models.localization.cnn_network_1 import CNN
 import torch
 from torch.utils.data import DataLoader
 
@@ -7,6 +6,7 @@ class CNNLocalizer:
     def __init__(
         self,
         loss_fn,
+        network,
         learning_rate=0.001,
         num_epochs=10,
     ):
@@ -18,11 +18,15 @@ class CNNLocalizer:
             if torch.cuda.is_available()
             else "mps" if torch.backends.mps.is_available() else "cpu"
         )
+        self.network = network
         print(f"running on: {str(self.device)}")
 
     def fit(self, dataloader: DataLoader):
-        self.model = CNN().to(self.device)
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.model = self.network().to(self.device)
+        optimizer = torch.optim.Adam(
+            self.model.parameters(),
+            lr=self.learning_rate,
+        )
         self.model.train()
 
         for i in range(self.num_epochs):
