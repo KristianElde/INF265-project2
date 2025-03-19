@@ -24,4 +24,5 @@ class CNN(nn.Module):
 
     def forward(self, x):
         x = self.convolutional_layers(x)
+        x = x.permute(0, 2, 3, 1)
         return x

@@ -1,4 +1,4 @@
-from src.models.localization.cnn_network_1 import CNN
+from src.models.detection.cnn_network2 import CNN
 import torch
 from torch.utils.data import DataLoader
 
@@ -26,18 +26,20 @@ class CNNDetector:
         self.model.train()
 
         for i in range(self.num_epochs):
-            print(f"Epoch {i}/{self.num_epochs}")
+            epoch_loss = 0
             for X_batch, y_batch in dataloader:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
 
                 # Forward pass
                 outputs = self.model(X_batch)
                 loss = self.loss_fn(outputs, y_batch)
+                epoch_loss += loss.item()
 
                 # Backward pass
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+            print(f"Epoch {i+1}/{self.num_epochs} — Loss: {epoch_loss}")
 
         return self
 
@@ -46,12 +48,19 @@ class CNNDetector:
             raise ValueError("fit must be called before calling predict")
 
         self.model.eval()
-        preds = torch.empty(0, device=self.device)
         X = X.to(self.device)
+
         with torch.no_grad():
             outputs = self.model(X)
-        predicted = torch.argmax(outputs[:, :5], dim=1)
+
+        predicted_classes = torch.argmax(outputs[:, :, :, 5:], dim=1, keepdim=True)
+        predicted_detection = torch.sigmoid(outputs[:, :, :, 0:1]) > 0.5
         preds = torch.cat(
-            (preds, torch.cat((outputs[:, :5], predicted.unsqueeze(1)), dim=1))
+            (
+                predicted_detection.float(),
+                outputs[:, :, :1:5],
+                predicted_classes.float(),
+            ),
+            dim=1,
         )
         return preds
