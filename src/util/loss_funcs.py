@@ -33,6 +33,6 @@ def localization_loss(outputs, y_true):
 
 def detection_loss(outputs, y_true):
     batch_size = outputs.shape[0]
-    losses = localization_loss(outputs.view(-1, 7), y_true.view(-1, 7))
-    loss = torch.sum(losses).item()
+    losses = localization_loss(outputs.reshape(-1, 7), y_true.view(-1, 6))
+    loss = torch.sum(losses)
     return loss / batch_size
