@@ -12,7 +12,7 @@ def _compute_detection_loss(y_true, outputs):
 def _compute_localization_loss(y_true, outputs):
     criterion = MSELoss(reduction="none")
     loss = criterion(outputs[:, 1:5], y_true[:, 1:5])
-    loss = torch.sum(loss, dim=1)
+    loss = torch.mean(loss, dim=1)
     return loss
 
 
