@@ -31,18 +31,19 @@ class CNNLocalizer:
 
         for i in range(self.num_epochs):
             epoch_loss = 0
+            nums = 0
             for X_batch, y_batch in dataloader:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
 
                 outputs = self.model(X_batch)
                 loss = torch.mean(self.loss_fn(outputs, y_batch))
                 epoch_loss += loss.item()
-
+                nums += 1
                 # Backward pass
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            print(f"Epoch {i+1}/{self.num_epochs} — Loss: {epoch_loss}")
+            print(f"Epoch {i+1}/{self.num_epochs} — Loss: {epoch_loss/nums}")
 
         return self
 
@@ -57,5 +58,9 @@ class CNNLocalizer:
             outputs = self.model(X)
 
         predicted_classes = torch.argmax(outputs[:, 5:], dim=1, keepdim=True)
-        preds = torch.cat((outputs[:, :5], predicted_classes.float()), dim=1)
+        predicted_detection = torch.sigmoid(outputs[:, 0:1]) > 0.5
+        preds = torch.cat(
+            (predicted_detection.float(), outputs[:, 1:5], predicted_classes.float()),
+            dim=1,
+        )
         return preds
