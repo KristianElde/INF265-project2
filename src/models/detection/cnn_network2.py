@@ -25,7 +25,6 @@ class CNN(nn.Module):
             nn.Conv2d(
                 in_channels=6, out_channels=num_classes, kernel_size=3, padding=1
             ),
-            nn.ReLU(),
             nn.MaxPool2d(kernel_size=4, stride=4),
         )
 
