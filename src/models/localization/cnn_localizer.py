@@ -40,6 +40,9 @@ class CNNLocalizer:
             betas=(self.momentum, 0.999),
         )
 
+        patience_counter = 0
+        best_val_loss = float("inf")
+
         for i in range(self.max_epochs):
             train_epoch_loss, val_epoch_loss = 0, 0
             num_train_batches, num_val_batches = 0, 0
@@ -56,9 +59,6 @@ class CNNLocalizer:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            print(
-                f"Epoch {i+1}/{self.max_epochs} — Loss: {train_epoch_loss/num_train_batches}"
-            )
 
             self.model.eval()
             for X_batch, y_batch in val_loader:
@@ -78,7 +78,6 @@ class CNNLocalizer:
 
             if val_epoch_loss < best_val_loss - delta:
                 best_val_loss = val_epoch_loss
-                patience_counter = 0
             else:
                 patience_counter += 1
                 if patience_counter >= patience:
