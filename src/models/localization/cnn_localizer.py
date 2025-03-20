@@ -65,7 +65,7 @@ class CNNLocalizer:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
                 with torch.no_grad():
                     outputs = self.model(X_batch)
-                loss = self.loss_fn(outputs, y_batch)
+                loss = torch.mean(self.loss_fn(outputs, y_batch))
                 val_epoch_loss += loss.item()
                 num_val_batches += 1
 
