@@ -2,13 +2,13 @@ import torch
 import torch.nn as nn
 
 
-class CNNNoBatchNorm(nn.Module):
+class CNN(nn.Module):
     def __init__(
         self,
         num_classes=15,
     ):
         torch.manual_seed(42)
-        super(CNNNoBatchNorm, self).__init__()
+        super(CNN, self).__init__()
         self.convolutional_layers = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1),
             nn.ReLU(),
@@ -16,15 +16,15 @@ class CNNNoBatchNorm(nn.Module):
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(in_channels=32, out_channels=48, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=3),
-            nn.Conv2d(in_channels=48, out_channels=64, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1),
             nn.ReLU(),
         )
 
         self.fully_connected_layers = nn.Sequential(
-            nn.Linear(64 * 4 * 5, 128),
+            nn.Linear(256 * 4 * 5, 128),
             nn.ReLU(),
             nn.Dropout(0.25),
             nn.Linear(128, 64),
