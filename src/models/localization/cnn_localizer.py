@@ -8,11 +8,15 @@ class CNNLocalizer:
         loss_fn,
         network,
         learning_rate=0.001,
-        num_epochs=10,
+        max_epochs=10,
+        weight_decay=0,
+        momentum=0.9,
     ):
-        self.learning_rate = learning_rate
-        self.num_epochs = num_epochs
         self.loss_fn = loss_fn
+        self.learning_rate = learning_rate
+        self.max_epochs = max_epochs
+        self.weight_decay = weight_decay
+        self.momentum = momentum
         self.device = torch.device(
             "cuda"
             if torch.cuda.is_available()
@@ -21,29 +25,65 @@ class CNNLocalizer:
         self.network = network
         print(f"running on: {str(self.device)}")
 
-    def fit(self, dataloader: DataLoader):
+    def fit(
+        self,
+        train_loader: DataLoader,
+        val_loader: DataLoader,
+        delta: int = 0.01,
+        patience: int = 3,
+    ):
         self.model = self.network().to(self.device)
         optimizer = torch.optim.Adam(
             self.model.parameters(),
             lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+            betas=(self.momentum, 0.999),
         )
-        self.model.train()
 
-        for i in range(self.num_epochs):
-            epoch_loss = 0
-            nums = 0
-            for X_batch, y_batch in dataloader:
+        for i in range(self.max_epochs):
+            train_epoch_loss, val_epoch_loss = 0, 0
+            num_train_batches, num_val_batches = 0, 0
+
+            self.model.train()
+            for X_batch, y_batch in train_loader:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
 
                 outputs = self.model(X_batch)
                 loss = torch.mean(self.loss_fn(outputs, y_batch))
                 epoch_loss += loss.item()
-                nums += 1
-                # Backward pass
+                num_train_batches += 1
+
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            print(f"Epoch {i+1}/{self.num_epochs} — Loss: {epoch_loss/nums}")
+            print(
+                f"Epoch {i+1}/{self.max_epochs} — Loss: {epoch_loss/num_train_batches}"
+            )
+
+            self.model.eval()
+            for X_batch, y_batch in val_loader:
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+                with torch.no_grad():
+                    outputs = self.model(X_batch)
+                loss = self.loss_fn(outputs, y_batch)
+                val_epoch_loss += loss.item()
+                num_val_batches += 1
+
+            val_epoch_loss /= num_val_batches
+            train_epoch_loss /= num_train_batches
+
+            print(
+                f"Epoch {i+1}/{self.max_epochs} — Training loss: {train_epoch_loss} — Val loss: {val_epoch_loss}"
+            )
+
+            if val_epoch_loss < best_val_loss - delta:
+                best_val_loss = val_epoch_loss
+                patience_counter = 0
+            else:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    print(f"Stopped at epoch {i+1}")
+                    break
 
         return self
 
@@ -64,3 +104,11 @@ class CNNLocalizer:
             dim=1,
         )
         return preds
+
+    def get_params(self):
+        return {
+            "learning_rate": self.learning_rate,
+            "network": self.network,
+            "momentum": self.momentum,
+            "weight_decay": self.weight_decay,
+        }
