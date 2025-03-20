@@ -50,14 +50,14 @@ class CNNLocalizer:
 
                 outputs = self.model(X_batch)
                 loss = torch.mean(self.loss_fn(outputs, y_batch))
-                epoch_loss += loss.item()
+                train_epoch_loss += loss.item()
                 num_train_batches += 1
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
             print(
-                f"Epoch {i+1}/{self.max_epochs} — Loss: {epoch_loss/num_train_batches}"
+                f"Epoch {i+1}/{self.max_epochs} — Loss: {train_epoch_loss/num_train_batches}"
             )
 
             self.model.eval()
