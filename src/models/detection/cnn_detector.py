@@ -92,7 +92,7 @@ class CNNDetector:
         with torch.no_grad():
             outputs = self.model(X)
 
-        predicted_detection = torch.sigmoid(outputs[:, :, :, 0:1]) > 0.5
+        predicted_detection = torch.sigmoid(outputs[:, :, :, 0:1])
         predicted_classes = torch.argmax(outputs[:, :, :, 5:], dim=3, keepdim=True)
         preds = torch.cat(
             (
