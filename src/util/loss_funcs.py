@@ -18,7 +18,7 @@ def _compute_localization_loss(y_true, outputs):
 
 def _compute_classification_loss(y_true, outputs):
     criterion = CrossEntropyLoss(reduction="none")
-    return criterion(outputs[:, 5:], y_true[:, 5])
+    return criterion(outputs[:, 5:], y_true[:, 5].long())
 
 
 def localization_loss(outputs, y_true):
