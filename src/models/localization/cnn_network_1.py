@@ -26,12 +26,7 @@ class CNN1(nn.Module):
         self.fully_connected_layers = nn.Sequential(
             nn.Linear(128 * 4 * 5, 128),
             nn.ReLU(),
-            nn.Dropout(0.25),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, num_classes),
+            nn.Linear(128, num_classes),
         )
 
     def forward(self, x):
