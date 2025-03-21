@@ -78,6 +78,7 @@ class CNNLocalizer:
 
             if val_epoch_loss < best_val_loss - delta:
                 best_val_loss = val_epoch_loss
+                patience_counter = 0
             else:
                 patience_counter += 1
                 if patience_counter >= patience:
