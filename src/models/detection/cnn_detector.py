@@ -40,8 +40,10 @@ class CNNDetector:
             weight_decay=self.weight_decay,
             betas=(self.momentum, 0.999),
         )
+
         best_val_loss = float("inf")
         patience_counter = 0
+        training_losses, val_losses = [], []
 
         for i in range(self.max_epochs):
             train_epoch_loss, val_epoch_loss = 0, 0
@@ -78,6 +80,9 @@ class CNNDetector:
                 f"Epoch {i+1}/{self.max_epochs} — Training loss: {train_epoch_loss} — Val loss: {val_epoch_loss}"
             )
 
+            training_losses.append(train_epoch_loss)
+            val_losses.append(val_epoch_loss)
+
             if val_epoch_loss < best_val_loss - delta:
                 best_val_loss = val_epoch_loss
                 patience_counter = 0
@@ -87,7 +92,7 @@ class CNNDetector:
                     print(f"Stopped at epoch {i+1}")
                     break
 
-        return self
+        return training_losses, val_losses
 
     def predict(self, X):
         if not self.model:
