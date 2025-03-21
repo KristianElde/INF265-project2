@@ -15,8 +15,8 @@ class ResNet18Localization(nn.Module):
         self.fc = nn.Linear(512, 1 + 4 + num_classes)
 
     def forward(self, x):
-        x = self.backbone(x)  # Feature extraction
-        x = torch.flatten(x, 1)  # Flatten before FC
-        x = self.fc(x)  # Output shape: (B, 1 + 4 + num_classes)
+        x = self.backbone(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
 
         return x
