@@ -5,10 +5,17 @@ from torch.utils.data import DataLoader
 
 class CNNDetector:
     def __init__(
-        self, loss_fn, learning_rate=0.001, max_epochs=10, weight_decay=0, momentum=0.9
+        self,
+        loss_fn,
+        network,
+        learning_rate=0.001,
+        max_epochs=10,
+        weight_decay=0,
+        momentum=0.9,
     ):
         self.learning_rate = learning_rate
         self.max_epochs = max_epochs
+        self.network = network
         self.weight_decay = weight_decay
         self.momentum = momentum
         self.loss_fn = loss_fn
@@ -26,7 +33,7 @@ class CNNDetector:
         patience=3,
     ):
 
-        self.model = CNN().to(self.device)
+        self.model = self.network().to(self.device)
         optimizer = torch.optim.Adam(
             self.model.parameters(),
             lr=self.learning_rate,
