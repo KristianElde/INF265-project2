@@ -2,13 +2,13 @@ import torch
 import torch.nn as nn
 
 
-class CNN(nn.Module):
+class CNN1(nn.Module):
     def __init__(
         self,
         num_classes=15,
     ):
         torch.manual_seed(42)
-        super(CNN, self).__init__()
+        super(CNN1, self).__init__()
         self.convolutional_layers = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1),
             nn.ReLU(),
